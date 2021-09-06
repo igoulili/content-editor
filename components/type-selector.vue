@@ -24,6 +24,7 @@
         </v-btn-toggle>
       </template>
       <span
+        v-if="type"
         class="type-selector-dial"
         v-text="types[type].tooltip"
       />
@@ -70,12 +71,23 @@ export default {
     open: false
   }),
   computed: {
+    displayType () {
+      return 'This message has the type ' + this.message.type
+    },
     type: {
       get () {
         return this.message.type
       },
       set (v) {
-        this.$store.commit('changeMessage', { id: this.message.id, element: 'type', to: v })
+        if (v && v !== this.message.type) {
+          this.$apollo.mutate({
+            mutation: require('~/graphql/UpdateMessageType'),
+            variables: {
+              id: this.message.id,
+              type: v
+            }
+          })
+        }
       }
     }
   }
