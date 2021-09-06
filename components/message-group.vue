@@ -153,7 +153,7 @@
                 @change="onFileSelected"
               />
               <v-textarea
-                :value="message.text"
+                :value="message.attachment"
                 full-width
                 auto-grow
                 rows="2"
@@ -161,9 +161,8 @@
                 @input="changeMessageText({id: message.id, element: 'attachment', to: $event})"
               />
 
-              <v-img
-                :src="message.text"
-              />
+              <v-img :src="message.attachment" />
+              <v-img v-if="url" :src="url" />
             </div>
 
             <div
@@ -179,28 +178,36 @@
                 @input="changeMessageText({id: message.id, element: 'text', to: $event})"
               />
             </div>
-
-            <!-- :get-child-payload="setDragIndex" -->
-            <container
-              v-else
-              group-name="episode-messages"
-              drag-handle-selector=".content-editor-draggable-handle"
-              @drag-start="setDragSource({
-                ...$event,
-                dragSource: message,
-              })"
-              @drop="moveMessage({
-                ...$event,
-                dragTarget: message,
-              })"
-            >
-              <message-group
-                v-for="submessage in message.messages"
-                :key="submessage.id"
-                :message="submessage"
-                :deletable="message.messages.length > 1"
-              />
-            </container>
+            <div v-else>
+              <container
+                group-name="episode-messages"
+                drag-handle-selector=".content-editor-draggable-handle"
+                :get-child-payload="setDragIndex"
+                @drag-start="setDragSource({
+                  ...$event,
+                  dragSource: message,
+                })"
+                @drop="moveMessage({
+                  ...$event,
+                  dragTarget: message,
+                })"
+              >
+                <v-textarea
+                  :value="message.text"
+                  full-width
+                  auto-grow
+                  rows="2"
+                  label="Enter message"
+                  @input="changeMessageText({id: message.id, element: 'text', to: $event})"
+                />
+                <message-group
+                  v-for="submessage in message.messages"
+                  :key="submessage.id"
+                  :message="submessage"
+                  :deletable="message.messages.length > 1"
+                />
+              </container>
+            </div>
           </v-col><!-- content-editor-draggable-content -->
         </v-row>
 
@@ -264,7 +271,8 @@ export default {
       loading3: false,
       loading4: false,
       loading5: false,
-      selectedFile: null
+      selectedFile: null,
+      File: ''
     }
   },
   watch: {
@@ -281,11 +289,12 @@ export default {
     onFileSelected (event) {
       console.log(event)
       this.selectedFile = event
+      this.url = URL.createObjectURL(event)
     },
     onUpload () {
       this.loader = 'loading5'
       const fd = new FormData()
-      fd.append('image', this.selectedFile, this.selectedFile.name)
+      fd.append('attachment', this.selectedFile, this.selectedFile.name)
       this.$axios.get('https://proc.mastory.io/version')
         .then((res) => {
           console.log(res)
