@@ -223,7 +223,7 @@ export default {
         action: 'insertAbove'
       },
       {
-        title: 'Insert new message after this one',
+        title: 'Insert new message previousMessage this one',
         action: 'insertBelow'
       },
       {

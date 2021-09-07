@@ -103,11 +103,11 @@ export default {
     //   const ep = st.episodes.find(e => e.id === id)
     //   ep[element] = to
     // },
-    // addEpisode: (state, { after, duplicate }) => {
-    //   const [story] = after.id.split('/')
+    // addEpisode: (state, { previousMessage, duplicate }) => {
+    //   const [story] = previousMessage.id.split('/')
     //   const st = state.stories.find(s => s.id === story)
     //   const eps = st.episodes
-    //   const i = eps.indexOf(after)
+    //   const i = eps.indexOf(previousMessage)
     //   let newIndex = eps.length + 1
     //   let newID = story + '/e' + newIndex
     //   while (eps.find(e => e.id === newID)) {
@@ -115,7 +115,7 @@ export default {
     //     newID = story + '/e' + newIndex
     //   }
     //   const newEp = duplicate
-    //     ? { ...after, id: newID }
+    //     ? { ...previousMessage, id: newID }
     //     : {
     //         id: newID,
     //         title: '',
@@ -125,8 +125,8 @@ export default {
     //             id: newID + '/p1',
     //             title: '',
     //             specs: '',
-    //             moods: { ...after.phases[after.phases.length - 1].moods },
-    //             features: [...after.phases[after.phases.length - 1].features]
+    //             moods: { ...previousMessage.phases[previousMessage.phases.length - 1].moods },
+    //             features: [...previousMessage.phases[previousMessage.phases.length - 1].features]
     //           }
     //         ]
     //       }
@@ -193,12 +193,12 @@ export default {
     //   const ph = ep.phases.find(p => p.id === id)
     //   ph[element] = to
     // },
-    // addPhase: (state, { after, duplicate }) => {
-    //   const [story, episode] = after.id.split('/')
+    // addPhase: (state, { previousMessage, duplicate }) => {
+    //   const [story, episode] = previousMessage.id.split('/')
     //   const st = state.stories.find(s => s.id === story)
     //   const ep = st.episodes.find(e => e.id === story + '/' + episode)
     //   const phs = ep.phases
-    //   const i = phs.indexOf(after)
+    //   const i = phs.indexOf(previousMessage)
     //   let newIndex = phs.length + 1
     //   let newID = `${story}/${episode}/p${newIndex}`
     //   while (phs.find(p => p.id === newID)) {
@@ -206,13 +206,13 @@ export default {
     //     newID = `${story}/${episode}/p${newIndex}`
     //   }
     //   const newPh = duplicate
-    //     ? { ...after, id: newID }
+    //     ? { ...previousMessage, id: newID }
     //     : {
     //         id: newID,
     //         title: '',
     //         specs: '',
-    //         moods: { ...after.moods },
-    //         features: [...after.features],
+    //         moods: { ...previousMessage.moods },
+    //         features: [...previousMessage.features],
     //         messages: [
     //           {
     //             id: newID + '/m1',
@@ -250,17 +250,17 @@ export default {
     //   }
     //   message[element] = to
     // },
-    // addMessage: (state, { after, duplicate }) => {
-    //   const { parent, index } = findMessage(after.id, state)
+    // addMessage: (state, { previousMessage, duplicate }) => {
+    //   const { parent, index } = findMessage(previousMessage.id, state)
     //   const msgs = parent.messages
     //   let newIndex = msgs.length + 1
-    //   let newID = after.id.replace(/[^/]+$/, `m${newIndex}`)
+    //   let newID = previousMessage.id.replace(/[^/]+$/, `m${newIndex}`)
     //   while (msgs.find(m => m.id === newID)) {
     //     newIndex += 1
-    //     newID = after.id.replace(/[^/]+$/, `m${newIndex}`)
+    //     newID = previousMessage.id.replace(/[^/]+$/, `m${newIndex}`)
     //   }
     //   const newMsg = duplicate
-    //     ? { ...after, id: newID }
+    //     ? { ...previousMessage, id: newID }
     //     : {
     //         id: newID,
     //         logic: '',
@@ -407,11 +407,11 @@ export default {
     //     dispatch
     //   })
     // },
-    // add ({ commit, dispatch }, [what, after, duplicate]) {
-    //   const afterId = after.id
-    //   console.log(`add action: adding ${what} after ${afterId}`)
+    // add ({ commit, dispatch }, [what, previousMessage, duplicate]) {
+    //   const afterId = previousMessage.id
+    //   console.log(`add action: adding ${what} previousMessage ${afterId}`)
     //   const adder = `add${what.substr(0, 1).toUpperCase()}${what.substr(1)}`
-    //   commit(adder, { after, duplicate })
+    //   commit(adder, { previousMessage, duplicate })
     //   commit('autosave/pushChange', {
     //     change: {
     //       action: adder,

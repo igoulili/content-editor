@@ -41,7 +41,7 @@
                           class="ml-2"
                           :color="hover ? 'blue' : 'grey lighten-2'"
                           v-on="on"
-                          @click="addMessage({after: message, duplicate: true})"
+                          @click="addMessage({previousMessage: message, duplicate: true})"
                         >
                           mdi-content-duplicate
                         </v-icon>
@@ -89,6 +89,7 @@
                 label="File input"
                 prepend-icon="mdi-microphone"
                 accept="audio/x-mpeg"
+                @change="onChange"
               />
               <v-textarea
                 :value="message.attachment"
@@ -98,9 +99,25 @@
                 label="Enter URL"
                 @change="changeMessage({element: 'attachment', to: $event})"
               />
-              <audio controls>
-                <source :src="message.attachment">
-              </audio>
+              <div
+                v-if="url"
+              >
+                <audio controls>
+                  <source
+                    :src="url"
+                  >
+                </audio>
+              </div>
+              <div
+                v-else
+              >
+                <audio
+                  controls
+                >
+                  <source :src="message.attachment">
+                  />
+                </audio>
+              </div>
             </div>
 
             <div
@@ -113,6 +130,7 @@
                 label="File input"
                 prepend-icon="mdi-youtube"
                 accept="video/mp4"
+                @change="onChange"
               />
               <v-textarea
                 :value="message.attachment"
@@ -122,11 +140,24 @@
                 label="Enter URL"
                 @change="changeMessage({element: 'attachment', to: $event})"
               />
-              <video
-                controls
-                :src="message.attachment"
-                type="video/mp4"
-              /></video>
+              <div
+                v-if="url"
+              >
+                <video
+                  controls
+                  :src="url"
+                  type="video/mp4"
+                />
+              </div>
+              <div
+                v-else
+              >
+                <video
+                  controls
+                  :src="message.attachment"
+                  type="video/mp4"
+                />
+              </div>
             </div>
 
             <div
@@ -134,10 +165,14 @@
               class="content-editor-draggable-message"
             >
               <v-file-input
+                v-model="file"
+                show-size
+                counter
                 type="file"
                 label="File input"
-                prepend-icon="mdi-message-image"
-                accept="image/png, image/jpeg, image/gif"
+                prepend-icon="mdi-camera"
+                accept="image/png, image/jpeg, image/bmp, image/gif"
+                @change="onChange"
               />
               <v-textarea
                 :value="message.attachment"
@@ -148,9 +183,8 @@
                 @change="changeMessage({element: 'attachment', to: $event})"
               />
 
-              <v-img
-                :src="message.attachment"
-              />
+              <v-img :src="message.attachment" />
+              <v-img v-if="url" :src="url" />
             </div>
 
             <div
@@ -219,7 +253,7 @@
           size="12"
           color="green"
           class="content-editor-draggable-add"
-          @click="addMessage({after: message})"
+          @click="addMessage({previousMessage: message})"
         >
           <v-icon color="white">
             mdi-plus
@@ -258,8 +292,14 @@ export default {
   data () {
     return {
       loading: false,
+      uploadFailedAlert: null,
+      loader: null,
+      loading5: false,
+      selectedFile: null,
+      url: null,
       file: null,
-      uploadFailedAlert: null
+      files: null,
+      File
     }
   },
   watch: {
@@ -300,8 +340,21 @@ export default {
         }
       }
     },
+    onChange (file) {
+      console.log(file)
+      if (file !== null) { this.url = URL.createObjectURL(file) }
+    },
+    async deleteMessage (message) {
+      if (confirm('Are you sure you want to delete this phase?')) {
+        this.updateMessageEditStateToSpecsIfNull(message)
+        const { id, number, sectionId } = message
+        await this.$apollo.mutate({
+          mutation: require('~/graphql/DeleteMessage'),
+          variables: { id, phaseId: sectionId, number }
+        })
+      }
+    },
     ...mapMutations([
-      'deleteMessage',
       'moveMessage',
       'setDragIndex',
       'setDragSource'
@@ -316,14 +369,14 @@ export default {
         variables
       })
     },
-    async addMessage ({ after, duplicate = false }) {
+    async addMessage ({ previousMessage, duplicate = false }) {
       let variables = {}
       if (duplicate) {
-        variables = { ...after }
+        variables = { ...previousMessage }
         delete variables.id
       }
-      variables.phaseId = after.section_id
-      variables.number = after.number + 1
+      variables.phaseId = previousMessage.sectionId
+      variables.number = previousMessage.number + 1
       await this.$apollo.mutate({
         mutation: require('~/graphql/AddMessage'),
         variables

@@ -87,7 +87,7 @@
                                       class="ml-2"
                                       :color="hover ? 'blue' : 'grey lighten-2'"
                                       v-on="on"
-                                      @click="addPhase({after: phase, duplicate: true, editField: data.story_chapter_by_pk.edit})"
+                                      @click="addPhase({previousMessage: phase, duplicate: true, editField: data.story_chapter_by_pk.edit})"
                                     >
                                       mdi-content-duplicate
                                     </v-icon>
@@ -175,7 +175,7 @@
                       size="12"
                       color="green"
                       class="content-editor-draggable-add"
-                      @click="addPhase({after: phase, editField: data.story_chapter_by_pk.edit})"
+                      @click="addPhase({previousMessage: phase, editField: data.story_chapter_by_pk.edit})"
                     >
                       <v-icon color="white">
                         mdi-plus
@@ -381,18 +381,18 @@ export default {
         })
       }
     },
-    async addPhase ({ after, duplicate = false, editField }) {
+    async addPhase ({ previousMessage, duplicate = false, editField }) {
       this.updateEpisodeEditStateToSpecsIfNull(editField)
-      const number = after.number ? after.number + 1 : 1
+      const number = previousMessage.number ? previousMessage.number + 1 : 1
       const variables = {
         episodeId: this.episodeId,
         number,
-        meta: JSON.parse(JSON.stringify(after.meta))
+        meta: JSON.parse(JSON.stringify(previousMessage.meta))
       }
       if (duplicate) {
         Object.assign(variables, {
-          title: after.title,
-          specs: after.specs
+          title: previousMessage.title,
+          specs: previousMessage.specs
         })
       }
       const { data } = await this.$apollo.mutate({

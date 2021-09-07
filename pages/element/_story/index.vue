@@ -178,7 +178,7 @@
                                     class="ml-2"
                                     :color="hover ? 'blue' : 'grey lighten-2'"
                                     v-on="on"
-                                    @click="addEpisode({ after: episode, duplicate: true })"
+                                    @click="addEpisode({ previousMessage: episode, duplicate: true })"
                                   >
                                     mdi-content-duplicate
                                   </v-icon>
@@ -270,7 +270,7 @@
                     size="12"
                     color="green"
                     class="content-editor-draggable-add"
-                    @click="addEpisode({ after: episode })"
+                    @click="addEpisode({ previousMessage: episode })"
                   >
                     <v-icon color="white">
                       mdi-plus
@@ -413,17 +413,17 @@ export default {
       return newStory
     },
 
-    async addEpisode ({ after, duplicate = false }) {
-      const number = after.number ? after.number + 1 : 1
+    async addEpisode ({ previousMessage, duplicate = false }) {
+      const number = previousMessage.number ? previousMessage.number + 1 : 1
       const variables = {
         storyId: this.storyId,
         number
       }
       if (duplicate) {
         Object.assign(variables, {
-          title: after.title,
-          description: after.description,
-          specs: after.specs
+          title: previousMessage.title,
+          description: previousMessage.description,
+          specs: previousMessage.specs
         })
       }
       const { data } = await this.$apollo.mutate({
@@ -435,7 +435,7 @@ export default {
         variables: {
           episodeId: data.insert_story_chapter_one.id,
           number: 1,
-          meta: JSON.parse(JSON.stringify(after.sections[after.sections.length - 1].meta))
+          meta: JSON.parse(JSON.stringify(previousMessage.sections[previousMessage.sections.length - 1].meta))
         }
       })
     },
