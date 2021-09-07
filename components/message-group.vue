@@ -113,8 +113,10 @@
                 placeholder="Upload your documents"
                 label="File input"
                 multiple
+                show-size
                 prepend-icon="mdi-youtube"
                 accept="video/mp4, video/mov"
+                @change="onFileSelected"
               >
                 <template #selection="{ text }">
                   <v-chip
@@ -132,37 +134,26 @@
                 auto-grow
                 rows="2"
                 label="Enter URL"
-                @input="changeMessageText({id: message.id, element: 'attachment', to: $event})"
+                @input="({id: message.id, element: 'video', to: $event})"
               />
-              <video
-                controls
-                :src="message.video"
-                type="video/mp4"
-              /></video>
-            </div>
-
-            <div
-              v-else-if="message.type == 'image'"
-              class="content-editor-draggable-message"
-            >
-              <v-file-input
-                type="file"
-                label="File input"
-                prepend-icon="mdi-camera"
-                accept="image/png, image/jpeg, image/bmp, image/gif"
-                @change="onFileSelected"
-              />
-              <v-textarea
-                :value="message.attachment"
-                full-width
-                auto-grow
-                rows="2"
-                label="Enter URL"
-                @input="changeMessageText({id: message.id, element: 'attachment', to: $event})"
-              />
-
-              <v-img :src="message.attachment" />
-              <v-img v-if="url" :src="url" />
+              <div
+                v-if="url"
+              >
+                <video
+                  controls
+                  :src="url"
+                  type="video/mp4"
+                />
+              </div>
+              <div
+                v-else
+              >
+                <video
+                  controls
+                  :src="message.video"
+                  type="video/mp4"
+                />
+              </div>
             </div>
 
             <div
@@ -207,6 +198,10 @@
                   :deletable="message.messages.length > 1"
                 />
               </container>
+            </div>
+            </div>
+            </v-file-input>
+            </div>
             </div>
           </v-col><!-- content-editor-draggable-content -->
         </v-row>
@@ -287,9 +282,13 @@ export default {
   },
   methods: {
     onFileSelected (event) {
-      console.log(event)
-      this.selectedFile = event
-      this.url = URL.createObjectURL(event)
+      if (event) {
+        this.selectedFile = event
+        this.url = URL.createObjectURL(event)
+      } else {
+        this.selectedFile = null
+        this.url = null
+      }
     },
     onUpload () {
       this.loader = 'loading5'
@@ -307,6 +306,14 @@ export default {
       'setDragIndex',
       'setDragSource'
     ]),
+    changeMessageVideo () {
+      this.$apollo.mutate({
+        mutation: require('~/graphql/UpdateMessageVideo'),
+        variables: {
+          id: this.message.id,
+          text: this.message.video
+        }
+      },
     changeMessageText () {
       this.$apollo.mutate({
         mutation: require('~/graphql/UpdateMessageText'),
