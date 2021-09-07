@@ -2,7 +2,7 @@ name: REQ)Content-editor
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -20,6 +20,6 @@ jobs:
         with:
             ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
             dokku-host: ${{ secrets.HOSTNAME }}
-            app-name: ${{ secrets.DEV_CONTENT_EDITOR_NAME }}
-            remote-branch: develop
+            app-name: ${{ secrets.PROD_CONTENT_EDITOR_NAME }}
+            remote-branch: master
             git-push-flags: --set-upstream --force
